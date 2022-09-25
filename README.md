@@ -1,3 +1,39 @@
+# How-To's
+
+## Install Dependencies
+
+`composer install`
+or if the lockfile is being a problem `composer update`
+
+## Create the Database
+
+modify the `.env` file `DB_DATABASE` to point somewhere correct for your project.
+run `php artisan migrate`
+
+## Seed the Database
+
+`php artisan db:seed`
+
+## Run the server
+
+`php artisan serve`
+
+## Make a new model (with migration)
+
+`php artisan make:model MODELNAME -m`
+
+## Make a new Seeder
+
+`php artisan make:seeder MODELNAMETableSeeder`
+
+add the seeder to `./database/seeders/DatabaseSeeder.php`
+
+## Make a new controller
+
+`php artisan make:controller MODELNAMEController`
+
+# Original Laravel Garbage
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">
