@@ -7,9 +7,20 @@
 	"item": [
 		{
 			"name": "Register",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"accept": true
+				}
+			},
 			"request": {
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
 				"body": {
 					"mode": "raw",
 					"raw": "{\r\n    \"name\": \"Kevin\",\r\n    \"email\": \"kevin@trytradeup.com\",\r\n    \"password\": \"Qwerty123!\"\r\n}",
@@ -20,7 +31,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://127.0.0.1:8000/register",
+					"raw": "http://127.0.0.1:8000/api/register",
 					"protocol": "http",
 					"host": [
 						"127",
@@ -30,6 +41,7 @@
 					],
 					"port": "8000",
 					"path": [
+						"api",
 						"register"
 					]
 				}
@@ -96,10 +108,32 @@
 		{
 			"name": "Me",
 			"request": {
-				"method": "GET",
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
 				"header": [],
 				"url": {
-					"raw": ""
+					"raw": "http://127.0.0.1:8000/api/me",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"me"
+					]
 				}
 			},
 			"response": []
@@ -107,10 +141,32 @@
 		{
 			"name": "Get All Articles",
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": ""
+					"raw": "http://127.0.0.1:8000/api/articles",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"articles"
+					]
 				}
 			},
 			"response": []
