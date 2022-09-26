@@ -3,7 +3,30 @@
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
 
+$Profiling_Timings = [];
+$Profiling_Names = [];
+
+function Profile_Event(string $message):void {
+  global $Profiling_Timings,$Profiling_Names;
+  $Profiling_Timings[] = microtime(true);
+  $Profiling_Names[] = $message;
+}
+
+function Profile_Print():void {
+  global $Profiling_Timings,$Profiling_Names;
+  $size = count($Profiling_Timings);
+  for($i = 0; $i < $size-1; $i++) {
+    $difference = $Profiling_Timings[$i+1]-$Profiling_Timings[$i];
+    error_log("{$Profiling_Names[$i]}: {$difference} seconds");
+    // echo "<b>{$Profiling_Names[$i]}</b><br>";
+    // echo sprintf("&nbsp;&nbsp;&nbsp;%f<br>",$Profiling_Timings[$i+1]-$Profiling_Timings[$i]);
+  }
+  $overall = $Profiling_Timings[$size-1]-$Profiling_Timings[0];
+  error_log("Overall Request Time: {$overall} seconds");
+}
+
 define('LARAVEL_START', microtime(true));
+Profile_Event("App Start");
 
 /*
 |--------------------------------------------------------------------------
@@ -31,6 +54,7 @@ if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php'))
 |
 */
 
+Profile_Event("Vendor Autoload");
 require __DIR__.'/../vendor/autoload.php';
 
 /*
@@ -44,12 +68,19 @@ require __DIR__.'/../vendor/autoload.php';
 |
 */
 
+Profile_Event("App Bootstrap");
 $app = require_once __DIR__.'/../bootstrap/app.php';
 
+Profile_Event("Create Kernel");
 $kernel = $app->make(Kernel::class);
 
+Profile_Event("Handle Request");
 $response = $kernel->handle(
     $request = Request::capture()
 )->send();
 
+Profile_Event("Terminal Kernel");
 $kernel->terminate($request, $response);
+
+Profile_Event("App Terminate");
+Profile_Print();
