@@ -2,6 +2,7 @@
 
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 $Profiling_Timings = [];
 $Profiling_Names = [];
@@ -17,12 +18,10 @@ function Profile_Print():void {
   $size = count($Profiling_Timings);
   for($i = 0; $i < $size-1; $i++) {
     $difference = $Profiling_Timings[$i+1]-$Profiling_Timings[$i];
-    error_log("{$Profiling_Names[$i]}: {$difference} seconds");
-    // echo "<b>{$Profiling_Names[$i]}</b><br>";
-    // echo sprintf("&nbsp;&nbsp;&nbsp;%f<br>",$Profiling_Timings[$i+1]-$Profiling_Timings[$i]);
+    Log::info("{$Profiling_Names[$i]}: {$difference} seconds");
   }
   $overall = $Profiling_Timings[$size-1]-$Profiling_Timings[0];
-  error_log("Overall Request Time: {$overall} seconds");
+  Log::info("Overall Request Time: {$overall} seconds");
 }
 
 define('LARAVEL_START', microtime(true));
