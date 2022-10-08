@@ -91,7 +91,7 @@ $config = new Config(
     //     Different ways to send data to Jaeger. Config::ZIPKIN_OVER_COMPACT - default):
     'dispatch_mode' => Config::JAEGER_OVER_BINARY_UDP,
   ],
-  'your-app-name'
+  'Backend'
 );
 $config->initializeTracer();
 $tracer = GlobalTracer::get();
