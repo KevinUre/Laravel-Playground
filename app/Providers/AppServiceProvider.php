@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use App\Services\NumberService;
+use OpenTracing\GlobalTracer;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -14,8 +15,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $tracer = GlobalTracer::get();
+        $scope = $tracer->startActiveSpan('Backend Call');
         $this->app->singleton(NumberService::class, function () {
             return new NumberService(rand());
+        });
+        $this->app->instance('context.tracer.globalSpan',$scope);
+        app()->terminating(function () {
+            app('context.tracer.globalSpan')->close();
+            $tracer = GlobalTracer::get();
+            $tracer->flush();
         });
     }
 

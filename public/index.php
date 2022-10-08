@@ -95,7 +95,6 @@ $config = new Config(
 );
 $config->initializeTracer();
 $tracer = GlobalTracer::get();
-$scope = $tracer->startActiveSpan('TestSpan', []);
 
 Profile_Event("Create Kernel");
 $kernel = $app->make(Kernel::class);
@@ -105,8 +104,6 @@ $response = $kernel->handle(
   $request = Request::capture()
 )->send();
 
-$scope->close();
-$tracer->flush();
 Profile_Event("Terminal Kernel");
 $kernel->terminate($request, $response);
 

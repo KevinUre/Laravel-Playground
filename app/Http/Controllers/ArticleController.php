@@ -4,12 +4,17 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Article;
+use OpenTracing\GlobalTracer;
 
 class ArticleController extends Controller
 {
     public function index()
     {
-        return Article::all();
+        $tracer = GlobalTracer::get();
+        $scope = $tracer->startActiveSpan('All Articles Request');
+        $data = Article::all();
+        $scope->close();
+        return $data;
     }
 
     public function show(Article $article)

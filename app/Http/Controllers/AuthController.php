@@ -6,10 +6,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use OpenTracing\GlobalTracer;
 
 class AuthController extends Controller
 {
     public function register(Request $request) {
+        $tracer = GlobalTracer::get();
+        $scope = $tracer->startActiveSpan('Register User Request');
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -24,6 +27,7 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        $scope->close();
         return response()->json([
             'access_token' => $token,
             'token_type' => 'Bearer',
@@ -31,6 +35,8 @@ class AuthController extends Controller
     }
 
     public function login(Request $request) {
+        $tracer = GlobalTracer::get();
+        $scope = $tracer->startActiveSpan('Login Request');
         if (!Auth::attempt($request->only('email', 'password'))) {
         return response()->json([
             'message' => 'Invalid login details'
@@ -41,6 +47,7 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        $scope->close();
         return response()->json([
             'access_token' => $token,
             'token_type' => 'Bearer',
