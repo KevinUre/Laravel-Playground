@@ -24,7 +24,7 @@ networks:
 services:
     site:
         build:
-            context: ./dockerfiles
+            context: .
             dockerfile: nginx.dockerfile
             args:
                 - UID=${UID:-1000}
@@ -33,10 +33,11 @@ services:
         ports:
             - 80:80
             - 8000:80
-        volumes:
-            - .:/home/project
+        # volumes:
+        #     - .:/home/project
         depends_on:
             - php
+            - jaeger
             # - redis
             # - mysql
             # - mailhog
@@ -62,16 +63,18 @@ services:
 
     php:
         build:
-            context: ./dockerfiles
+            context: .
             dockerfile: php.dockerfile
             args:
                 - UID=${UID:-1000}
                 - GID=${GID:-1000}
         container_name: php
-        volumes:
-            - .:/home/project
+        # volumes:
+        #     - .:/home/project
         networks:
             - laravel
+        depends_on:
+            - jaeger
 
     # redis:
     #     image: redis:alpine
@@ -82,53 +85,54 @@ services:
     #     networks:
     #         - laravel
 
-    composer:
-        build:
-            context: ./dockerfiles
-            dockerfile: composer.dockerfile
-            args:
-                - UID=${UID:-1000}
-                - GID=${GID:-1000}
-        container_name: composer
-        volumes:
-            - .:/home/project
-        working_dir: /home/project
-        depends_on:
-            - php
-        user: laravel
-        entrypoint: [ 'composer', '--ignore-platform-reqs' ]
-        networks:
-            - laravel
+    # composer:
+    #     build:
+    #         context: ./dockerfiles
+    #         dockerfile: composer.dockerfile
+    #         args:
+    #             - UID=${UID:-1000}
+    #             - GID=${GID:-1000}
+    #     container_name: composer
+    #     volumes:
+    #         - .:/home/project
+    #     working_dir: /home/project
+    #     depends_on:
+    #         - php
+    #     user: laravel
+    #     entrypoint: [ 'composer', '--ignore-platform-reqs' ]
+    #     networks:
+    #         - laravel
 
-    npm:
-        image: node:13.7
-        container_name: npm
-        volumes:
-            - .:/home/project
-        ports:
-            - 3000:3000
-            - 3001:3001
-        working_dir: /home/project
-        entrypoint: [ 'npm' ]
-        networks:
-            - laravel
+    # npm:
+    #     image: node:13.7
+    #     container_name: npm
+    #     volumes:
+    #         - .:/home/project
+    #     ports:
+    #         - 3000:3000
+    #         - 3001:3001
+    #     working_dir: /home/project
+    #     entrypoint: [ 'npm' ]
+    #     networks:
+    #         - laravel
 
-    artisan:
-        build:
-            context: ./dockerfiles
-            dockerfile: php.dockerfile
-            args:
-                - UID=${UID:-1000}
-                - GID=${GID:-1000}
-        container_name: artisan
-        volumes:
-            - .:/home/project
-        # depends_on:
-        #     - mysql
-        working_dir: /home/project
-        entrypoint: [ 'php', '/home/project/artisan' ]
-        networks:
-            - laravel
+    # artisan:
+    #     build:
+    #         context: ./dockerfiles
+    #         dockerfile: php.dockerfile
+    #         args:
+    #             - UID=${UID:-1000}
+    #             - GID=${GID:-1000}
+    #     container_name: artisan
+    #     volumes:
+    #         - .:/home/project
+    #     # depends_on:
+    #     #     - mysql
+    #     working_dir: /home/project
+    #     entrypoint: [ 'php', '/home/project/artisan' ]
+    #     networks:
+    #         - laravel
+
     # mailhog:
     #     image: mailhog/mailhog:latest
     #     container_name: mailhog
@@ -137,3 +141,14 @@ services:
     #         - 8025:8025
     #     networks:
     #         - laravel
+
+    jaeger:
+        image: jaegertracing/all-in-one:latest
+        container_name: jaeger
+        ports:
+            - "6831:6831/udp"
+            - "16686:16686"
+        networks:
+            - laravel
+        environment:
+            - VIRTUAL_PORT=16686

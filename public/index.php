@@ -24,6 +24,7 @@ function Profile_Print():void {
   Log::info("Overall Request Time: {$overall} seconds");
 }
 
+
 define('LARAVEL_START', microtime(true));
 Profile_Event("App Start");
 

@@ -29,6 +29,16 @@ RUN mkdir -p /usr/src/php/ext/redis \
     && echo 'redis' >> /usr/src/php-available-exts \
     && docker-php-ext-install redis
 
-COPY . .
+COPY . /home/project
+RUN chmod -R 777 /home/project/storage/
+RUN chmod -R 777 /home/project/database/
+
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+RUN composer install --optimize-autoloader --no-dev
+RUN php artisan config:cache
+RUN php artisan route:cache
+RUN php artisan view:cache
 
 CMD ["php-fpm", "-y", "/usr/local/etc/php-fpm.conf", "-R"]
