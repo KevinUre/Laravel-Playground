@@ -17,8 +17,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(NumberService::class, function () {
             return new NumberService(rand());
         });
-
-        
     }
 
     /**

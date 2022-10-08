@@ -7,20 +7,22 @@ use Illuminate\Support\Facades\Log;
 $Profiling_Timings = [];
 $Profiling_Names = [];
 
-function Profile_Event(string $message):void {
-  global $Profiling_Timings,$Profiling_Names;
+function Profile_Event(string $message): void
+{
+  global $Profiling_Timings, $Profiling_Names;
   $Profiling_Timings[] = microtime(true);
   $Profiling_Names[] = $message;
 }
 
-function Profile_Print():void {
-  global $Profiling_Timings,$Profiling_Names;
+function Profile_Print(): void
+{
+  global $Profiling_Timings, $Profiling_Names;
   $size = count($Profiling_Timings);
-  for($i = 0; $i < $size-1; $i++) {
-    $difference = $Profiling_Timings[$i+1]-$Profiling_Timings[$i];
+  for ($i = 0; $i < $size - 1; $i++) {
+    $difference = $Profiling_Timings[$i + 1] - $Profiling_Timings[$i];
     Log::info("{$Profiling_Names[$i]}: {$difference} seconds");
   }
-  $overall = $Profiling_Timings[$size-1]-$Profiling_Timings[0];
+  $overall = $Profiling_Timings[$size - 1] - $Profiling_Timings[0];
   Log::info("Overall Request Time: {$overall} seconds");
 }
 
@@ -39,8 +41,8 @@ Profile_Event("App Start");
 |
 */
 
-if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
-    require $maintenance;
+if (file_exists($maintenance = __DIR__ . '/../storage/framework/maintenance.php')) {
+  require $maintenance;
 }
 
 /*
@@ -55,7 +57,7 @@ if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php'))
 */
 
 Profile_Event("Vendor Autoload");
-require __DIR__.'/../vendor/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
 
 /*
 |--------------------------------------------------------------------------
@@ -69,16 +71,42 @@ require __DIR__.'/../vendor/autoload.php';
 */
 
 Profile_Event("App Bootstrap");
-$app = require_once __DIR__.'/../bootstrap/app.php';
+$app = require_once __DIR__ . '/../bootstrap/app.php';
+
+use Jaeger\Config;
+use OpenTracing\GlobalTracer;
+
+$config = new Config(
+  [
+    'sampler' => [
+      'type' => Jaeger\SAMPLER_TYPE_CONST,
+      'param' => true,
+    ],
+    'logging' => true,
+    "local_agent" => [
+      "reporting_host" => "jaeger"//,
+      //        You can override port by setting local_agent.reporting_port value   
+      //"reporting_port" => 6832
+    ],
+    //     Different ways to send data to Jaeger. Config::ZIPKIN_OVER_COMPACT - default):
+    'dispatch_mode' => Config::JAEGER_OVER_BINARY_UDP,
+  ],
+  'your-app-name'
+);
+$config->initializeTracer();
+$tracer = GlobalTracer::get();
+$scope = $tracer->startActiveSpan('TestSpan', []);
 
 Profile_Event("Create Kernel");
 $kernel = $app->make(Kernel::class);
 
 Profile_Event("Handle Request");
 $response = $kernel->handle(
-    $request = Request::capture()
+  $request = Request::capture()
 )->send();
 
+$scope->close();
+$tracer->flush();
 Profile_Event("Terminal Kernel");
 $kernel->terminate($request, $response);
 
