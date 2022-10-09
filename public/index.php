@@ -76,6 +76,18 @@ $app = require_once __DIR__ . '/../bootstrap/app.php';
 use Jaeger\Config;
 use OpenTracing\GlobalTracer;
 
+if (!function_exists('getallheaders')) {
+  function getallheaders() {
+  $headers = [];
+  foreach ($_SERVER as $name => $value) {
+      if (substr($name, 0, 5) == 'HTTP_') {
+          $headers[str_replace(' ', '-', strtolower(str_replace('_', ' ', substr($name, 5))))] = $value;
+      }
+  }
+  return $headers;
+  }
+}
+
 $config = new Config(
   [
     'sampler' => [
