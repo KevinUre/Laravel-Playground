@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 Use App\Models\Article;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ErrorController;
 use App\Services\NumberService;
 
 /*
@@ -32,6 +33,10 @@ Route::middleware('auth:sanctum')->post('articles', [ArticleController::class, '
 Route::middleware('auth:sanctum')->put('articles/{article}', [ArticleController::class, 'update']);
 Route::middleware('auth:sanctum')->delete('articles/{article}', [ArticleController::class, 'delete']);
 
+Route::get('/fiveHundred', [ErrorController::class, 'fiveHundred']);
+Route::get('/fourOhFour', [ErrorController::class, 'fourOhFour']);
+Route::get('/fourHundred', [ErrorController::class, 'fourHundred']);
+Route::get('/error', [ErrorController::class, 'error']);
 
 Route::get('/number', function() {
     return app(NumberService::class)->GetNumber();

@@ -14,12 +14,12 @@ class ArticleController extends Controller
         $scope = $tracer->startActiveSpan('All Articles Request');
         $data = Article::all();
         $scope->close();
-        return $data;
+        return response()->json($data, 200);
     }
 
     public function show(Article $article)
     {
-        return $article;
+        return response()->json($article, 200);
     }
 
     public function store(Request $request)
