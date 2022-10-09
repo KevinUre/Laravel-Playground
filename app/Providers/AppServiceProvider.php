@@ -6,6 +6,11 @@ use Illuminate\Support\ServiceProvider;
 use App\Services\NumberService;
 use OpenTracing\GlobalTracer;
 use OpenTracing\Formats;
+use Illuminate\Foundation\Http\Events\RequestHandled;
+use Illuminate\Log\Events\MessageLogged;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -38,6 +43,25 @@ class AppServiceProvider extends ServiceProvider
         });
         $this->app->singleton(NumberService::class, function () {
             return new NumberService(rand());
+        });
+        Event::listen(RequestHandled::class, function (RequestHandled $e) {
+            app('context.tracer.globalSpan')->getSpan()->setTag('user_id', auth()->user()->id ?? "-");
+            app('context.tracer.globalSpan')->getSpan()->setTag('request_host', $e->request->getHost());
+            app('context.tracer.globalSpan')->getSpan()->setTag('request_path', $path = $e->request->path());
+            app('context.tracer.globalSpan')->getSpan()->setTag('request_method', $e->request->method());
+            app('context.tracer.globalSpan')->getSpan()->setTag('response_status', $e->response->getStatusCode());
+            app('context.tracer.globalSpan')->getSpan()->setTag('error', !$e->response->isSuccessful(),);
+        });
+        Event::listen(MessageLogged::class, function (MessageLogged $e) {
+            $tracer = GlobalTracer::get();
+            $span = $tracer->getActiveSpan();
+            $span->log((array) $e);
+        });
+        DB::listen(function ($query) {
+            Log::debug("[DB Query] {$query->connection->getName()}", [
+                'query' => str_replace('"', "'", $query->sql),
+                'time' => $query->time.'ms',
+            ]);
         });
     }
 
