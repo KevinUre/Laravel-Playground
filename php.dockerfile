@@ -29,7 +29,7 @@ RUN mkdir -p /usr/src/php/ext/redis \
     && echo 'redis' >> /usr/src/php-available-exts \
     && docker-php-ext-install redis
 
-COPY . /home/project
+COPY ./backend/ /home/project
 RUN chmod -R 777 /home/project/storage/
 RUN chmod -R 777 /home/project/database/
 
