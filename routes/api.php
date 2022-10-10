@@ -23,9 +23,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/me', [AuthController::class, 'me'])->middleware('auth:sanctum');
+Route::post('/apiregister', [AuthController::class, 'register']);
+Route::post('/apilogin', [AuthController::class, 'login']);
+// Route::post('/me', [AuthController::class, 'me'])->middleware('auth:sanctum');
 
 Route::middleware('auth:sanctum')->get('articles', [ArticleController::class, 'index']);
 Route::middleware('auth:sanctum')->get('articles/{article}', [ArticleController::class, 'show']);
