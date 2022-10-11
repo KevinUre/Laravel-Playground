@@ -50,7 +50,12 @@ class AppServiceProvider extends ServiceProvider
             app('context.tracer.globalSpan')->getSpan()->setTag('request_path', $path = $e->request->path());
             app('context.tracer.globalSpan')->getSpan()->setTag('request_method', $e->request->method());
             app('context.tracer.globalSpan')->getSpan()->setTag('response_status', $e->response->getStatusCode());
-            app('context.tracer.globalSpan')->getSpan()->setTag('error', !$e->response->isSuccessful(),);
+            if ($e->response->getStatusCode() == 500) {
+                app('context.tracer.globalSpan')->getSpan()->setTag('error', true);
+            } else {
+                app('context.tracer.globalSpan')->getSpan()->setTag('error', false);
+            }
+            // app('context.tracer.globalSpan')->getSpan()->setTag('error', !$e->response->isSuccessful(),);
         });
         Event::listen(MessageLogged::class, function (MessageLogged $e) {
             $tracer = GlobalTracer::get();
