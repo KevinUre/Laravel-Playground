@@ -37,6 +37,7 @@ Route::get('/fiveHundred', [ErrorController::class, 'fiveHundred']);
 Route::get('/fourOhFour', [ErrorController::class, 'fourOhFour']);
 Route::get('/fourHundred', [ErrorController::class, 'fourHundred']);
 Route::get('/error', [ErrorController::class, 'error']);
+Route::get('/headers', [ErrorController::class, 'headers']);
 
 Route::get('/number', function() {
     return app(NumberService::class)->GetNumber();
