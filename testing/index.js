@@ -1,5 +1,5 @@
 const { trace }  = require("@opentelemetry/api");
-const { BasicTracerProvider, ConsoleSpanExporter, SimpleSpanProcessor }  = require("@opentelemetry/sdk-trace-base");
+const { BasicTracerProvider, ConsoleSpanExporter, SimpleSpanProcessor, TracerConfig }  = require("@opentelemetry/sdk-trace-base");
 const { JaegerExporter } = require ('@opentelemetry/exporter-jaeger');
 const axios = require('axios');
 
@@ -14,8 +14,15 @@ const options = {
 }
 const exporter = new JaegerExporter(options);
 
+const genRanHex = size => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+var tracerConfig = {
+  idGenerator: {
+    generateTraceId: () => genRanHex(16),
+    generateSpanId: () => genRanHex(16),
+  }
+};
 // Create and register an SDK
-const provider = new BasicTracerProvider();
+const provider = new BasicTracerProvider(tracerConfig);
 // provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
 provider.addSpanProcessor(new SimpleSpanProcessor(exporter));
 trace.setGlobalTracerProvider(provider);
@@ -27,8 +34,8 @@ const tracer = trace.getTracer(name, version);
 
 // Trace your application by creating spans
 async function operation() {
-  const span = tracer.startSpan("do operation");
-  span.setAttribute("service.name","frontend");
+  const span = tracer.startSpan("Login");
+  span.setAttribute("service.name","Frontend");
   // mock some work by sleeping 1 second
   // await new Promise((resolve, reject) => {
   //   setTimeout(resolve, 1000);
@@ -43,6 +50,7 @@ async function operation() {
     "password": "Qwerty123!"
   }
   const response = await axios.post("http://127.0.0.1:8000/api/apilogin", payload, config)
+  // const response = await axios.get("http://127.0.0.1:8000/api/headers", config)
   console.log(response.data)
   console.log(span.spanContext().traceId);
   span.end();
